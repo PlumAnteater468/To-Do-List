@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transient To-Do Dashboard</title>
+<style>
+:root{--navy:#112b45;--blue:#1f6f8b;--teal:#22a699;--gold:#f2b84b;--red:#d95d59;--ink:#182431;--muted:#667788;--line:#dce5ec;--paper:#f4f7fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 "Segoe UI",Arial,sans-serif}
+button,input,select{font:inherit}
+header{background:linear-gradient(125deg,var(--navy),#174b68);color:white;padding:28px clamp(18px,4vw,54px) 32px}
+header h1{margin:0;font-size:clamp(24px,3vw,38px)}
+header p{margin:6px 0 0;color:#d9e8f1}
+.top{display:flex;justify-content:space-between;gap:18px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#today{color:#d9e8f1;margin-right:6px}
+button{border:0;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:650}
+.primary{background:var(--teal);color:white}
+.ghost{background:#ffffff1c;color:white;border:1px solid #ffffff44}
+main{max-width:1450px;margin:-18px auto 48px;padding:0 22px}
+.statusbar{background:white;border:1px solid var(--line);border-radius:11px;padding:10px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 5px 18px #17334d12;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin:16px 0}
+.card{background:white;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 4px 15px #17334d0b;margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 14px;color:var(--navy)}
+.kpis .card{margin:0}
+.stat{cursor:pointer}.stat.on{outline:2px solid var(--teal)}
+.kpi small{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.kpi strong{display:block;font-size:30px;color:var(--navy);margin-top:4px}
+.kpi em{font-style:normal;color:var(--muted);font-size:12px}
+input,select{border:1px solid #ccd8e1;background:white;border-radius:8px;padding:9px 10px;color:var(--ink)}
+.add{display:grid;grid-template-columns:1fr auto auto auto;gap:9px}
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tab{background:#e8eef3;color:var(--muted)}.tab.active{background:var(--navy);color:white}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input{flex:1;min-width:220px}.toolbar select{min-width:150px}
+.tablewrap{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:white}
+.row{display:grid;grid-template-columns:18px 22px 34px 1fr 140px 28px;gap:10px;align-items:start;padding:9px 10px;border-bottom:1px solid #e8eef2}
+.row:last-child{border:0}.row:not(.th):hover{background:#f4faf9}
+.row.th{background:var(--navy);color:white;font-weight:700;align-items:center}
+.row input[type=checkbox]{margin:3px 0 0;width:17px;height:17px;accent-color:var(--teal)}
+.txt{word-break:break-word;cursor:text}.txt.done{text-decoration:line-through;color:var(--muted)}
+.meta{color:var(--muted);font-size:12px;margin-top:2px}
+.pill{display:inline-block;min-width:30px;text-align:center;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:750;cursor:pointer}
+.pM{background:#fde4e3;color:#963c39}.pS{background:#fff0d1;color:#8a5a00}.pC{background:#dff3ee;color:#176c61}.pW{background:#e8eef3;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:#edf3f7;color:var(--navy);margin-left:6px}
+.x{background:none;color:var(--muted);padding:2px 6px}.x:hover{color:var(--red)}
+.grip{cursor:grab;color:var(--muted);user-select:none;font-size:15px;line-height:1.2}
+.row.dragging{opacity:.4}.drop-b{box-shadow:0 -2px 0 var(--teal)}.drop-a{box-shadow:0 2px 0 var(--teal)}
+.empty{text-align:center;padding:36px;color:var(--muted)}
+.note{background:#eef7f6;border-left:4px solid var(--teal);padding:10px 12px;border-radius:5px;color:var(--muted);margin-top:12px}
+@media(max-width:850px){.top{flex-direction:column}}
+@media(max-width:600px){main{padding:0 12px}.add{grid-template-columns:1fr 1fr}.add input:first-child{grid-column:1/-1}.row{grid-template-columns:18px 22px 34px 1fr 28px}.meta,.th span:nth-child(5){display:none}}
+.dot{background:var(--gold)}.dot.live{background:var(--teal)}#sourceText{flex:1}
+.light{background:#edf3f7;color:var(--navy)}
+.modal{position:fixed;inset:0;background:#0a1b2bc9;display:none;place-items:center;padding:20px;z-index:10}.modal.open{display:grid}
+.panel{background:white;border-radius:14px;width:min(700px,100%);max-height:90vh;overflow:auto;padding:24px}
+.panel h2{margin:0 0 10px;color:var(--navy)}.panel p,.panel li{color:var(--muted)}
+.fields{display:grid;gap:12px}.field label{display:block;font-weight:700;margin-bottom:4px}.field input{width:100%}
+.error{background:#fff0ef;color:#9c3732;padding:10px;border-radius:7px;display:none;margin-top:12px}
+code{background:#eef2f5;padding:2px 5px;border-radius:4px;word-break:break-all}
+</style>
+</head>
+<body>
+<header><div class="top"><div><h1>Ryan's To-Do Dashboard</h1><p>Non-routine items as they come up &middot; <span id="today"></span></p></div>
+<div class="actions"><button class="ghost" id="exp" title="Download a plain-text copy of your list">Export</button><button class="ghost" id="imp" title="Replace the workbook list with a plain-text file">Import</button><input type="file" id="file" accept=".txt" hidden><button class="ghost" id="setupBtn">Connection setup</button><button class="primary" id="refreshBtn">Connect &amp; refresh</button></div></div></header>
+<main>
+<div class="statusbar"><span class="dot" id="statusDot"></span><span id="sourceText">Not connected. Use &ldquo;Connect &amp; refresh&rdquo; to load your list from OneDrive.</span><button class="light" id="signOutBtn" hidden>Sign out</button></div>
+<section class="kpis" id="stats"></section>
+<div class="card"><h2>Add an item</h2><div class="add">
+<input id="newText" placeholder="Add a new item and press Enter…">
+<select id="newPri"></select><input id="newTag" placeholder="Tag (optional)" size="12" list="tags"><button class="primary" id="addBtn">Add</button>
+</div><datalist id="tags"></datalist></div>
+<div class="card"><h2>Task list</h2>
+<div class="tabs"><button class="tab active" id="tOpen">Current</button><button class="tab" id="tRet">Retired</button></div>
+<div class="toolbar"><input type="search" id="q" placeholder="Search…"><select id="tagF"><option value="">All tags</option></select></div>
+<div class="tablewrap"><div class="row th"><span></span><span></span><span>Pri</span><span>Item</span><span>Date</span><span></span></div><div id="list"></div></div>
+<div class="note" id="legend"></div></div>
+</main>
+<div class="modal" id="modal"><div class="panel">
+<h2>Live OneDrive connection</h2>
+<p>This page reads and writes the <code>Current List Items</code> and <code>Retired List Items</code> worksheets of your to-do workbook through Microsoft Graph. Columns: Date, Priority (M/S/C/W), List Item, Tag.</p>
+<div class="note"><b>One-time setup:</b> you can reuse the app registration from your Food Safety dashboard. In the <a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a>, open it, add this page&rsquo;s URL (shown below) as an additional <b>Single-page application</b> redirect URI, and keep delegated <code>Files.ReadWrite</code>. No client secret is used.</div>
+<ol><li>Host this HTML on an HTTPS website (same place as your other dashboards).</li><li>Add the redirect URI below to the app registration.</li><li>In OneDrive, create a sharing link for the to-do workbook (Share &rarr; Copy link, with edit permission).</li></ol>
+<div class="fields">
+<div class="field"><label>Application (client) ID</label><input id="clientId" placeholder="00000000-0000-0000-0000-000000000000"></div>
+<div class="field"><label>Workbook OneDrive sharing link</label><input id="shareUrl" placeholder="https://1drv.ms/x/s/..."></div>
+<div class="field"><label>Redirect URI to register</label><input id="redirectShow" readonly></div></div>
+<div class="error" id="error"></div>
+<div class="actions" style="margin-top:16px"><button class="primary" id="saveConnect">Save &amp; connect</button><button class="light" id="closeModal">Close</button></div>
+</div></div>
+<script>
+const PRI={M:{n:"Must"},S:{n:"Should"},C:{n:"Could"},W:{n:"Won't / Wait"}};
+const ORDER="MSCW",AUTHORITY="https://login.microsoftonline.com/consumers",SCOPE="openid profile offline_access Files.ReadWrite";
+const SHEET_OPEN="Current List Items",SHEET_RET="Retired List Items",CFG="todoDashConfig",TOK="todoDashToken";
+let st={items:[],view:"open",pri:"",n:1},live=false,drive=null,item=null,fname="",snap=null,dirty=false,busy=0,timer=null,chain=Promise.resolve();
+const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,"0");
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function add(t,p,g,d){st.items.push({id:st.n++,t:t.trim(),p,g:(g||"").trim(),created:d===undefined?today():d,done:false,retired:""})}
+const need=()=>live||(alert("Connect to your OneDrive workbook first (Connect & refresh)."),false);
+function setSource(m,ok){$("sourceText").textContent=m;$("statusDot").classList.toggle("live",ok)}
+// ---- Microsoft sign-in (same method as the Food Safety dashboard: PKCE, personal accounts, Files.ReadWrite)
+const getConfig=()=>{try{return JSON.parse(localStorage.getItem(CFG))||{}}catch{return{}}};
+const redirectUri=()=>location.protocol==="file:"?"":location.origin+location.pathname;
+const rnd=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(v=>(v%36).toString(36)).join("");
+const b64=b=>btoa(String.fromCharCode(...b)).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
+const shareToken=u=>"u!"+b64(new TextEncoder().encode(u));
+const rawTok=()=>{try{return JSON.parse(sessionStorage.getItem(TOK))}catch{return null}};
+async function tokenReq(p){const r=await fetch(AUTHORITY+"/oauth2/v2.0/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:getConfig().clientId,scope:SCOPE,...p})});
+ const j=await r.json();if(!r.ok)throw new Error(j.error_description||"Token request failed.");j.expires_at=Date.now()+j.expires_in*1000;return j}
+async function token(){const t=rawTok();if(!t)return null;if(Date.now()<t.expires_at-60000)return t;if(!t.refresh_token)return null;
+ try{const j=await tokenReq({grant_type:"refresh_token",refresh_token:t.refresh_token});j.refresh_token=j.refresh_token||t.refresh_token;sessionStorage.setItem(TOK,JSON.stringify(j));return j}catch{return null}}
+async function login(){const c=getConfig();if(!c.clientId||!c.shareUrl){openSetup("Complete both connection fields first.");return}
+ if(!redirectUri()){openSetup("Host this HTML on an HTTP or HTTPS address before signing in.");return}
+ const v=rnd(64),s=rnd(24);sessionStorage.setItem("todoPkce",v);sessionStorage.setItem("todoState",s);
+ const ch=b64(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v))));
+ location.href=AUTHORITY+"/oauth2/v2.0/authorize?"+new URLSearchParams({client_id:c.clientId,response_type:"code",redirect_uri:redirectUri(),response_mode:"query",scope:SCOPE,state:s,code_challenge:ch,code_challenge_method:"S256"})}
+async function redeemCode(){const q=new URLSearchParams(location.search);if(q.get("error"))throw new Error(q.get("error_description")||q.get("error"));
+ const code=q.get("code");if(!code)return false;if(q.get("state")!==sessionStorage.getItem("todoState"))throw new Error("The sign-in state did not match. Please try again.");
+ const j=await tokenReq({grant_type:"authorization_code",code,redirect_uri:redirectUri(),code_verifier:sessionStorage.getItem("todoPkce")});
+ sessionStorage.setItem(TOK,JSON.stringify(j));history.replaceState({},document.title,redirectUri());return true}
+async function graph(path,opt){const t=await token();if(!t)throw new Error("Not signed in. Use Connect & refresh.");
+ const r=await fetch("https://graph.microsoft.com/v1.0"+path,{...opt,headers:{Authorization:"Bearer "+t.access_token,"Content-Type":"application/json"}});
+ if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error?.message||"Microsoft Graph returned status "+r.status)}return r.json()}
+// ---- Workbook read / write
+const sheetUrl=n=>"/drives/"+encodeURIComponent(drive)+"/items/"+encodeURIComponent(item)+"/workbook/worksheets/"+encodeURIComponent(n);
+const readSheet=async n=>(await graph(sheetUrl(n)+"/usedRange(valuesOnly=true)?$select=values")).values||[];
+const iso2serial=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);return m?Math.round((Date.UTC(+m[1],+m[2]-1,+m[3])-Date.UTC(1899,11,30))/864e5):s};
+const cell2date=v=>{if(typeof v==="number"&&v>25000)return new Date(Date.UTC(1899,11,30)+v*864e5).toISOString().slice(0,10);const s=String(v??"").trim();return /^\d{4}-\d{2}-\d{2}/.test(s)?s.slice(0,10):s};
+const norm=v=>{const r=v.slice(1).map(x=>[0,1,2,3].map(k=>String(x[k]??"")));while(r.length&&r[r.length-1].every(c=>c===""))r.pop();return r};
+const rows2items=(v,done)=>v.slice(1).filter(r=>String(r[2]??"").trim()).map(r=>{const d=cell2date(r[0]),p=String(r[1]??"").trim().toUpperCase()[0];
+ return{id:st.n++,t:String(r[2]).trim(),p:ORDER.includes(p||"?")?p:"S",g:String(r[3]??"").trim(),created:done?"":d,done,retired:done?d:""}});
+const txt=s=>/^[=+\-@]/.test(s)?"'"+s:s,dOf=i=>i.done?i.retired:i.created;
+const snapOf=a=>a.map(i=>[String(iso2serial(dOf(i))),i.p,i.t,i.g]);
+async function put(name,a,n){const v=a.map(i=>[iso2serial(dOf(i)),i.p,txt(i.t),txt(i.g)]);while(v.length<n)v.push(["","","",""]);if(!v.length)return;
+ await graph(sheetUrl(name)+"/range(address='A2:D"+(v.length+1)+"')",{method:"PATCH",body:JSON.stringify({values:v,numberFormat:v.map(()=>["yyyy-mm-dd","General","General","General"])})})}
+async function flush(){
+ const [fa,fb]=await Promise.all([readSheet(SHEET_OPEN),readSheet(SHEET_RET)]),na=norm(fa),nb=norm(fb),J=JSON.stringify;
+ if(snap&&(J(na)!==J(snap[0])||J(nb)!==J(snap[1]))&&confirm("The workbook has been changed outside this page (probably in Excel) since it was last loaded.\n\nOK = load the latest version (your last change here is discarded)\nCancel = overwrite the workbook with what you see here")){await refreshDashboard();return 1}
+ const A=st.items.filter(i=>!i.done),B=st.items.filter(i=>i.done),sa=snapOf(A),sb=snapOf(B);
+ await Promise.all([J(sa)!==J(na)?put(SHEET_OPEN,A,na.length):0,J(sb)!==J(nb)?put(SHEET_RET,B,nb.length):0]);snap=[sa,sb]}
+function persist(){dirty=true;setSource("Saving…",false);clearTimeout(timer);timer=setTimeout(()=>{timer=null;chain=chain.then(run)},500)}
+async function run(){if(!dirty)return;dirty=false;busy++;
+ try{const re=await flush();if(!dirty&&!re)setSource("Live • "+fname+" • saved "+new Date().toLocaleTimeString(),true)}
+ catch(e){dirty=true;setSource("Save failed: "+e.message+" (make another change to retry)",false)}finally{busy--}}
+addEventListener("beforeunload",e=>{if(dirty||busy||timer){e.preventDefault();e.returnValue=""}});
+async function refreshDashboard(){try{
+ if((dirty||timer)&&!confirm("Some changes haven't been saved to the workbook yet. Discard them and reload?"))return;
+ clearTimeout(timer);timer=null;setSource("Connecting…",false);
+ if(!await token()){await login();return}
+ const c=getConfig(),si=await graph("/shares/"+shareToken(c.shareUrl)+"/driveItem?$select=id,name,parentReference");
+ drive=si.parentReference?.driveId;if(!drive)throw new Error("The sharing link did not resolve to a OneDrive drive.");
+ item=si.id;fname=si.name;
+ const [fa,fb]=await Promise.all([readSheet(SHEET_OPEN),readSheet(SHEET_RET)]);
+ st.n=1;st.items=[...rows2items(fa,false),...rows2items(fb,true)];snap=[norm(fa),norm(fb)];dirty=false;live=true;
+ render();setSource("Live • "+fname+" • refreshed "+new Date().toLocaleString(),true);$("signOutBtn").hidden=false;
+}catch(e){setSource("Live refresh failed",false);openSetup(e.message)}}
+// ---- Connection setup dialog
+function openSetup(m=""){const c=getConfig();let id=c.clientId;if(!id){try{id=JSON.parse(localStorage.getItem("reviewDashConfig")).clientId}catch{}}
+ $("clientId").value=id||"";$("shareUrl").value=c.shareUrl||"";$("redirectShow").value=redirectUri()||"Host on HTTPS to generate a redirect URI";
+ $("error").textContent=m;$("error").style.display=m?"block":"none";$("modal").classList.add("open")}
+$("setupBtn").onclick=()=>openSetup();$("closeModal").onclick=()=>$("modal").classList.remove("open");
+$("saveConnect").onclick=()=>{localStorage.setItem(CFG,JSON.stringify({clientId:$("clientId").value.trim(),shareUrl:$("shareUrl").value.trim()}));$("modal").classList.remove("open");refreshDashboard()};
+$("refreshBtn").onclick=refreshDashboard;
+$("signOutBtn").onclick=()=>{sessionStorage.removeItem(TOK);$("signOutBtn").hidden=true;live=false;dirty=false;st.items=[];render();setSource("Signed out",false)};
+function render(){
+ const open=st.items.filter(i=>!i.done),ret=st.items.filter(i=>i.done);
+ const D={M:"Do first",S:"Do soon",C:"When time allows",W:"Parked or waiting"};
+ $("stats").innerHTML=`<div class="card kpi stat ${st.pri===""&&st.view==="open"?"on":""}" data-p=""><small>Open items</small><strong>${open.length}</strong><em>All priorities</em></div>`+
+  ORDER.split("").map(k=>`<div class="card kpi stat ${st.pri===k?"on":""}" data-p="${k}"><small>${k} · ${PRI[k].n}</small><strong>${open.filter(i=>i.p===k).length}</strong><em>${D[k]}</em></div>`).join("")+
+  `<div class="card kpi stat ${st.view==="ret"?"on":""}" data-p="R"><small>Retired</small><strong>${ret.length}</strong><em>Completed or dropped</em></div>`;
+ const tags=[...new Set(st.items.map(i=>i.g).filter(Boolean))].sort(),cur=$("tagF").value;
+ $("tagF").innerHTML='<option value="">All tags</option>'+tags.map(t=>`<option ${t===cur?"selected":""}>${esc(t)}</option>`).join("");
+ $("tags").innerHTML=tags.map(t=>`<option value="${esc(t)}">`).join("");
+ const q=$("q").value.toLowerCase(),tf=$("tagF").value;
+ let rows=(st.view==="open"?open:ret).filter(i=>(!st.pri||i.p===st.pri)&&(!tf||i.g===tf)&&(!q||(i.t+i.g).toLowerCase().includes(q)));
+ if(st.view==="ret")rows.reverse();st.vis=rows;const mv=st.view==="open";
+ $("list").innerHTML=rows.length?rows.map(i=>`<div class="row" data-id="${i.id}">
+  ${mv?`<span class="grip" draggable="true" title="Drag to reorder">⠿</span>`:"<span></span>"}
+  <input type="checkbox" ${i.done?"checked":""} title="${i.done?"Restore":"Retire"}">
+  <span class="pill p${i.p}" title="Click to change priority">${i.p}</span>
+  <div class="txt ${i.done?"done":""}" title="Double-click to edit">${esc(i.t)}${i.g?`<span class="tag">${esc(i.g)}</span>`:""}</div>
+  <div class="meta">${i.done?"Retired "+(i.retired||"—"):"Created "+(i.created||"—")}</div>
+  <button class="x" title="Delete">✕</button></div>`).join(""):`<div class="empty">${live?"Nothing here.":"Not connected. Use Connect &amp; refresh to load your list."}</div>`;
+ $("tOpen").classList.toggle("active",st.view==="open");$("tRet").classList.toggle("active",st.view==="ret");
+ $("legend").textContent="Priority key: "+ORDER.split("").map(k=>k+" = "+PRI[k].n).join(" · ")+". Drag ⠿ to reorder. Tick a box to retire an item; tick it again in Retired to restore it.";
+}
+function doAdd(){if(!need())return;const t=$("newText").value;if(!t.trim())return;add(t,$("newPri").value,$("newTag").value);$("newText").value="";st.view="open";persist();render()}
+$("newPri").innerHTML=ORDER.split("").map(k=>`<option value="${k}">${k} · ${PRI[k].n}</option>`).join("");
+$("addBtn").onclick=doAdd;$("newText").onkeydown=e=>{if(e.key==="Enter")doAdd()};
+$("stats").onclick=e=>{const b=e.target.closest(".stat");if(!b)return;const p=b.dataset.p;st.view=p==="R"?"ret":"open";st.pri=(p==="R"||p===st.pri)?"":p;render()};
+$("tOpen").onclick=()=>{st.view="open";st.pri="";render()};$("tRet").onclick=()=>{st.view="ret";st.pri="";render()};
+let drag=null;
+const clr=()=>document.querySelectorAll(".drop-b,.drop-a,.dragging").forEach(x=>x.classList.remove("drop-b","drop-a","dragging"));
+$("list").ondragstart=e=>{const g=e.target.closest&&e.target.closest(".grip");if(!g)return;const r=g.closest(".row");drag=+r.dataset.id;r.classList.add("dragging");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",String(drag));try{e.dataTransfer.setDragImage(r,10,10)}catch(x){}};
+$("list").ondragover=e=>{if(drag==null)return;const r=e.target.closest(".row");if(!r)return;e.preventDefault();document.querySelectorAll(".drop-b,.drop-a").forEach(x=>x.classList.remove("drop-b","drop-a"));const b=r.getBoundingClientRect();r.classList.add(e.clientY<b.top+b.height/2?"drop-b":"drop-a")};
+$("list").ondrop=e=>{if(drag==null)return;const r=e.target.closest(".row");if(!r)return;e.preventDefault();const before=e.clientY<r.getBoundingClientRect().top+r.offsetHeight/2,tid=+r.dataset.id;
+ if(tid!==drag){const it=st.items.find(x=>x.id===drag);st.items.splice(st.items.indexOf(it),1);const k=st.items.findIndex(x=>x.id===tid);st.items.splice(before?k:k+1,0,it);persist()}
+ drag=null;render()};
+$("list").ondragend=()=>{drag=null;clr()};
+$("q").oninput=render;$("tagF").onchange=render;
+$("list").onclick=e=>{const r=e.target.closest(".row");if(!r||!need())return;const i=st.items.find(x=>x.id==r.dataset.id);
+ if(e.target.matches("input[type=checkbox]")){i.done=!i.done;i.retired=i.done?today():"";i.created=i.done?i.created:today();st.items.splice(st.items.indexOf(i),1);st.items.push(i)}
+ else if(e.target.dataset.d){const v=st.vis,n=v[v.indexOf(i)+ +e.target.dataset.d];if(!n)return;const a=st.items.indexOf(i),b=st.items.indexOf(n);[st.items[a],st.items[b]]=[st.items[b],st.items[a]]}
+ else if(e.target.classList.contains("pill")){i.p=ORDER[(ORDER.indexOf(i.p)+1)%4]}
+ else if(e.target.classList.contains("x")){if(!confirm("Delete this item permanently?"))return;st.items=st.items.filter(x=>x!==i)}
+ else return;persist();render()};
+$("list").ondblclick=e=>{const d=e.target.closest(".txt");if(!d||!need())return;const i=st.items.find(x=>x.id==d.closest(".row").dataset.id);
+ const v=prompt("Edit item:",i.t);if(v&&v.trim()){i.t=v.trim();persist();render()}};
+const line=i=>{const a=[];if(i.g)a.push("Tag: "+i.g.replace(/[;()]/g," "));const d=i.done?i.retired:i.created;if(d)a.push((i.done?"Retired: ":"Created: ")+d);return "["+i.p+"] "+i.t.replace(/\s+/g," ")+(a.length?" ("+a.join("; ")+")":"")};
+function fromTxt(s){let sec="open",n=1;const out=[];
+ s.split(/\r?\n/).forEach(raw=>{let l=raw.trim();if(!l||l[0]==="#")return;
+  const h=l.match(/^=+\s*(current|open|retired|done)\b/i);if(h){sec=/^(retired|done)/i.test(h[1])?"ret":"open";return}
+  if(l[0]==="=")return;l=l.replace(/^[-*\u2022]\s+/,"");
+  const pm=l.match(/^\[([MSCWmscw])\]\s*(.*)$/);let p="S",r=l;if(pm){p=pm[1].toUpperCase();r=pm[2]}
+  let g="",d="";const m=r.match(/\s*\(((?:Tag|Created|Retired)\s*:[^()]*)\)\s*$/i);
+  if(m){r=r.slice(0,m.index).trim();m[1].split(";").forEach(x=>{const k=x.match(/^\s*(tag|created|retired)\s*:\s*(.*?)\s*$/i);if(!k)return;if(k[1].toLowerCase()==="tag")g=k[2];else if(/^\d{4}-\d{2}-\d{2}$/.test(k[2]))d=k[2]})}
+  if(!r)return;const ret=sec==="ret";out.push({id:n++,t:r,p,g,created:ret?"":d,done:ret,retired:ret?d:""})});
+ return out}
+$("exp").onclick=()=>{const txt=["# To-Do List - exported "+today(),"# One item per line:  [M] Item text (Tag: name; Created: YYYY-MM-DD)","# Priorities: M = Must, S = Should, C = Could, W = Won't / Wait. Tag and date are optional.","# Lines starting with # are ignored. You can edit this file and import it back.","","== CURRENT ==",...st.items.filter(i=>!i.done).map(line),"","== RETIRED ==",...st.items.filter(i=>i.done).map(line),""].join("\r\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain"}));a.download="todo-list-"+today()+".txt";a.click()};
+$("imp").onclick=()=>$("file").click();
+$("file").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f||!need())return;f.text().then(x=>{const items=fromTxt(x);if(!items.length)return alert("Couldn't find any list items in that file.");const o=items.filter(i=>!i.done).length;
+ if(confirm("Replace the list in your workbook with "+o+" current and "+(items.length-o)+" retired items from this file?")){st.items=items;st.n=items.length+1;persist();render()}})};
+$("today").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+(async()=>{render();try{if(await redeemCode())await refreshDashboard();else if(rawTok())await refreshDashboard();else if(!getConfig().clientId)setTimeout(()=>openSetup(),350)}catch(e){openSetup(e.message)}})();
+</script>
+</body>
+</html>
