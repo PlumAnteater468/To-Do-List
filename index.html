@@ -33,8 +33,9 @@ input,select{border:1px solid #ccd8e1;background:white;border-radius:8px;padding
 .add{display:grid;grid-template-columns:1fr auto auto auto;gap:9px}
 .tabs{display:flex;gap:4px;margin-bottom:12px}
 .tab{background:#e8eef3;color:var(--muted)}.tab.active{background:var(--navy);color:white}
-.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
-.toolbar input{flex:1;min-width:220px}.toolbar select{min-width:150px}
+.toolbar{display:flex;gap:9px;flex-wrap:nowrap;align-items:center;margin-bottom:12px}
+.toolbar input{flex:1 1 200px;min-width:120px;max-width:360px}.toolbar select{min-width:130px}
+.toolbar .tabs{margin:0;flex:none}
 .tablewrap{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:white}
 .row{display:grid;grid-template-columns:18px 22px 34px 1fr 140px 28px;gap:10px;align-items:start;padding:9px 10px;border-bottom:1px solid #e8eef2}
 .row:last-child{border:0}.row:not(.th):hover{background:#f4faf9}
@@ -51,7 +52,7 @@ input,select{border:1px solid #ccd8e1;background:white;border-radius:8px;padding
 .empty{text-align:center;padding:36px;color:var(--muted)}
 .note{background:#eef7f6;border-left:4px solid var(--teal);padding:10px 12px;border-radius:5px;color:var(--muted);margin-top:12px}
 @media(max-width:850px){.top{flex-direction:column}}
-@media(max-width:600px){main{padding:0 12px}.add{grid-template-columns:1fr 1fr}.add input:first-child{grid-column:1/-1}.row{grid-template-columns:18px 22px 34px 1fr 28px}.meta,.th span:nth-child(5){display:none}}
+@media(max-width:600px){.toolbar{flex-wrap:wrap}.toolbar input{max-width:none}main{padding:0 12px}.add{grid-template-columns:1fr 1fr}.add input:first-child{grid-column:1/-1}.row{grid-template-columns:18px 22px 34px 1fr 28px}.meta,.th span:nth-child(5){display:none}}
 .dot{background:var(--gold)}.dot.live{background:var(--teal)}#sourceText{flex:1}
 .light{background:#edf3f7;color:var(--navy)}
 .modal{position:fixed;inset:0;background:#0a1b2bc9;display:none;place-items:center;padding:20px;z-index:10}.modal.open{display:grid}
@@ -73,8 +74,8 @@ code{background:#eef2f5;padding:2px 5px;border-radius:4px;word-break:break-all}
 <select id="newPri"></select><input id="newTag" placeholder="Tag (optional)" size="12" list="tags"><button class="primary" id="addBtn">Add</button>
 </div><datalist id="tags"></datalist></div>
 <div class="card"><h2>Task list</h2>
-<div class="tabs"><button class="tab active" id="tOpen">Current</button><button class="tab" id="tRet">Retired</button></div>
-<div class="toolbar"><input type="search" id="q" placeholder="Search…"><select id="tagF"><option value="">All tags</option></select></div>
+<div class="toolbar"><div class="tabs"><button class="tab active" id="tOpen">Current</button><button class="tab" id="tRet">Retired</button></div>
+<input type="search" id="q" placeholder="Search…"><select id="tagF"><option value="">All tags</option></select></div>
 <div class="tablewrap"><div class="row th"><span></span><span></span><span>Pri</span><span>Item</span><span>Date</span><span></span></div><div id="list"></div></div>
 <div class="note" id="legend"></div></div>
 </main>
