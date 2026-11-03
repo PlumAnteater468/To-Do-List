@@ -37,7 +37,7 @@ input,select{border:1px solid #ccd8e1;background:white;border-radius:8px;padding
 .toolbar input{flex:1 1 200px;min-width:120px;max-width:360px}.toolbar select{min-width:130px}
 .toolbar .tabs{margin:0;flex:none}
 .tablewrap{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:white}
-.row{display:grid;grid-template-columns:18px 22px 34px 1fr 140px 28px;gap:10px;align-items:start;padding:9px 10px;border-bottom:1px solid #e8eef2}
+.row{display:grid;grid-template-columns:18px 22px 34px 1fr 140px 56px;gap:10px;align-items:start;padding:9px 10px;border-bottom:1px solid #e8eef2}
 .row:last-child{border:0}.row:not(.th):hover{background:#f4faf9}
 .row.th{background:var(--navy);color:white;font-weight:700;align-items:center}
 .row input[type=checkbox]{margin:3px 0 0;width:17px;height:17px;accent-color:var(--teal)}
@@ -47,12 +47,14 @@ input,select{border:1px solid #ccd8e1;background:white;border-radius:8px;padding
 .pM{background:#fde4e3;color:#963c39}.pS{background:#fff0d1;color:#8a5a00}.pC{background:#dff3ee;color:#176c61}.pW{background:#e8eef3;color:var(--muted)}
 .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:#edf3f7;color:var(--navy);margin-left:6px}
 .x{background:none;color:var(--muted);padding:2px 6px}.x:hover{color:var(--red)}
+.acts{display:flex;gap:2px;justify-content:flex-end}.cal{background:none;padding:2px 4px}.cal:hover{filter:brightness(.8)}
+.field .chk{display:flex;gap:8px;align-items:center}.field .chk input{width:auto}
 .grip{cursor:grab;color:var(--muted);user-select:none;font-size:15px;line-height:1.2}
 .row.dragging{opacity:.4}.drop-b{box-shadow:0 -2px 0 var(--teal)}.drop-a{box-shadow:0 2px 0 var(--teal)}
 .empty{text-align:center;padding:36px;color:var(--muted)}
 .note{background:#eef7f6;border-left:4px solid var(--teal);padding:10px 12px;border-radius:5px;color:var(--muted);margin-top:12px}
 @media(max-width:850px){.top{flex-direction:column}}
-@media(max-width:600px){.toolbar{flex-wrap:wrap}.toolbar input{max-width:none}main{padding:0 12px}.add{grid-template-columns:1fr 1fr}.add input:first-child{grid-column:1/-1}.row{grid-template-columns:18px 22px 34px 1fr 28px}.meta,.th span:nth-child(5){display:none}}
+@media(max-width:600px){.toolbar{flex-wrap:wrap}.toolbar input{max-width:none}main{padding:0 12px}.add{grid-template-columns:1fr 1fr}.add input:first-child{grid-column:1/-1}.row{grid-template-columns:18px 22px 34px 1fr 56px}.meta,.th span:nth-child(5){display:none}}
 .dot{background:var(--gold)}.dot.live{background:var(--teal)}#sourceText{flex:1}
 .light{background:#edf3f7;color:var(--navy)}
 .modal{position:fixed;inset:0;background:#0a1b2bc9;display:none;place-items:center;padding:20px;z-index:10}.modal.open{display:grid}
@@ -90,6 +92,18 @@ code{background:#eef2f5;padding:2px 5px;border-radius:4px;word-break:break-all}
 <div class="field"><label>Redirect URI to register</label><input id="redirectShow" readonly></div></div>
 <div class="error" id="error"></div>
 <div class="actions" style="margin-top:16px"><button class="primary" id="saveConnect">Save &amp; connect</button><button class="light" id="closeModal">Close</button></div>
+</div></div>
+<div class="modal" id="calModal"><div class="panel" style="max-width:460px">
+<h2>Add to calendar</h2>
+<p id="calTitle" style="word-break:break-word"></p>
+<div class="fields">
+<div class="field"><label for="calDate">Date</label><input type="date" id="calDate"></div>
+<div class="field"><label class="chk"><input type="checkbox" id="calAll" checked> All-day event</label></div>
+<div class="field" id="calTimeRow" hidden><label for="calTime">Start time</label><input type="time" id="calTime" value="09:00">
+<label for="calDur" style="margin-top:10px">Length</label><select id="calDur" style="width:100%"><option value="15">15 minutes</option><option value="30" selected>30 minutes</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></div>
+</div>
+<div class="actions" style="margin-top:16px"><button class="primary" id="calGoogle">Google Calendar</button><button class="primary" id="calOutlook">Outlook</button><button class="light" id="calClose">Close</button></div>
+<p style="font-size:12px;margin:12px 0 0">A new tab opens with the event filled in. Check it and click Save there.</p>
 </div></div>
 <script>
 const PRI={M:{n:"Must"},S:{n:"Should"},C:{n:"Could"},W:{n:"Won't / Wait"}};
@@ -184,7 +198,7 @@ function render(){
   <span class="pill p${i.p}" title="Click to change priority">${i.p}</span>
   <div class="txt ${i.done?"done":""}" title="Double-click to edit">${esc(i.t)}${i.g?`<span class="tag">${esc(i.g)}</span>`:""}</div>
   <div class="meta">${i.done?"Retired "+(i.retired||"—"):"Created "+(i.created||"—")}</div>
-  <button class="x" title="Delete">✕</button></div>`).join(""):`<div class="empty">${live?"Nothing here.":"Not connected. Use Connect &amp; refresh to load your list."}</div>`;
+  <span class="acts">${mv?`<button class="cal" title="Add to calendar">📅</button>`:""}<button class="x" title="Delete">✕</button></span></div>`).join(""):`<div class="empty">${live?"Nothing here.":"Not connected. Use Connect &amp; refresh to load your list."}</div>`;
  $("tOpen").classList.toggle("active",st.view==="open");$("tRet").classList.toggle("active",st.view==="ret");
  $("legend").textContent="Priority key: "+ORDER.split("").map(k=>k+" = "+PRI[k].n).join(" · ")+". Drag ⠿ to reorder. Tick a box to retire an item; tick it again in Retired to restore it.";
 }
@@ -206,10 +220,32 @@ $("list").onclick=e=>{const r=e.target.closest(".row");if(!r||!need())return;con
  if(e.target.matches("input[type=checkbox]")){i.done=!i.done;i.retired=i.done?today():"";i.created=i.done?i.created:today();st.items.splice(st.items.indexOf(i),1);st.items.push(i)}
  else if(e.target.dataset.d){const v=st.vis,n=v[v.indexOf(i)+ +e.target.dataset.d];if(!n)return;const a=st.items.indexOf(i),b=st.items.indexOf(n);[st.items[a],st.items[b]]=[st.items[b],st.items[a]]}
  else if(e.target.classList.contains("pill")){i.p=ORDER[(ORDER.indexOf(i.p)+1)%4]}
+ else if(e.target.classList.contains("cal")){openCal(i);return}
  else if(e.target.classList.contains("x")){if(!confirm("Delete this item permanently?"))return;st.items=st.items.filter(x=>x!==i)}
  else return;persist();render()};
 $("list").ondblclick=e=>{const d=e.target.closest(".txt");if(!d||!need())return;const i=st.items.find(x=>x.id==d.closest(".row").dataset.id);
  const v=prompt("Edit item:",i.t);if(v&&v.trim()){i.t=v.trim();persist();render()}};
+//#cal
+let calItem=null;
+const ymd=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()),isoD=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const hm=d=>pad(d.getHours())+pad(d.getMinutes())+"00",isoT=d=>isoD(d)+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":00";
+function calWhen(){const v=$("calDate").value;if(!v){alert("Choose a date first.");return null}
+ const [y,m,d]=v.split("-").map(Number),all=$("calAll").checked;
+ if(all)return{all,s:new Date(y,m-1,d),e:new Date(y,m-1,d+1)};   // end date is exclusive
+ const [hh,mm]=($("calTime").value||"09:00").split(":").map(Number),s=new Date(y,m-1,d,hh,mm);
+ return{all,s,e:new Date(s.getTime()+(+$("calDur").value)*60000)}}
+const calNotes=i=>"Priority: "+i.p+" - "+PRI[i.p].n+(i.g?"\nTag: "+i.g:"")+"\nAdded from To-Do Dashboard";
+function googleUrl(i,w){const dates=w.all?ymd(w.s)+"/"+ymd(w.e):ymd(w.s)+"T"+hm(w.s)+"/"+ymd(w.e)+"T"+hm(w.e);
+ return "https://calendar.google.com/calendar/render?"+new URLSearchParams({action:"TEMPLATE",text:i.t,details:calNotes(i),dates})}
+function outlookUrl(i,w){  // personal Outlook.com; for a work/school account change outlook.live.com to outlook.office.com
+ return "https://outlook.live.com/calendar/0/deeplink/compose?"+new URLSearchParams({path:"/calendar/action/compose",rru:"addevent",subject:i.t,body:calNotes(i),
+  startdt:w.all?isoD(w.s):isoT(w.s),enddt:w.all?isoD(w.e):isoT(w.e),allday:w.all?"true":"false"})}
+//#endcal
+function openCal(i){calItem=i;$("calTitle").textContent=i.t;$("calDate").value=today();$("calAll").checked=true;$("calTimeRow").hidden=true;$("calTime").value="09:00";$("calDur").value="30";$("calModal").classList.add("open")}
+$("calAll").onchange=()=>{$("calTimeRow").hidden=$("calAll").checked};
+$("calClose").onclick=()=>$("calModal").classList.remove("open");
+$("calGoogle").onclick=()=>{const w=calWhen();if(w)window.open(googleUrl(calItem,w),"_blank","noopener")};
+$("calOutlook").onclick=()=>{const w=calWhen();if(w)window.open(outlookUrl(calItem,w),"_blank","noopener")};
 const line=i=>{const a=[];if(i.g)a.push("Tag: "+i.g.replace(/[;()]/g," "));const d=i.done?i.retired:i.created;if(d)a.push((i.done?"Retired: ":"Created: ")+d);return "["+i.p+"] "+i.t.replace(/\s+/g," ")+(a.length?" ("+a.join("; ")+")":"")};
 function fromTxt(s){let sec="open",n=1;const out=[];
  s.split(/\r?\n/).forEach(raw=>{let l=raw.trim();if(!l||l[0]==="#")return;
