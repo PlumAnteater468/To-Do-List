@@ -238,7 +238,7 @@ const calNotes=i=>"Priority: "+i.p+" - "+PRI[i.p].n+(i.g?"\nTag: "+i.g:"")+"\nAd
 function googleUrl(i,w){const dates=w.all?ymd(w.s)+"/"+ymd(w.e):ymd(w.s)+"T"+hm(w.s)+"/"+ymd(w.e)+"T"+hm(w.e);
  return "https://calendar.google.com/calendar/render?"+new URLSearchParams({action:"TEMPLATE",text:i.t,details:calNotes(i),dates})}
 function outlookUrl(i,w){  // personal Outlook.com; for a work/school account change outlook.live.com to outlook.office.com
- return "https://outlook.live.com/calendar/0/deeplink/compose?"+new URLSearchParams({path:"/calendar/action/compose",rru:"addevent",subject:i.t,body:calNotes(i),
+ return "https://outlook.office.com/calendar/0/deeplink/compose?"+new URLSearchParams({path:"/calendar/action/compose",rru:"addevent",subject:i.t,body:calNotes(i),
   startdt:w.all?isoD(w.s):isoT(w.s),enddt:w.all?isoD(w.e):isoT(w.e),allday:w.all?"true":"false"})}
 //#endcal
 function openCal(i){calItem=i;$("calTitle").textContent=i.t;$("calDate").value=today();$("calAll").checked=true;$("calTimeRow").hidden=true;$("calTime").value="09:00";$("calDur").value="30";$("calModal").classList.add("open")}
