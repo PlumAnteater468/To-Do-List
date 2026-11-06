@@ -25,6 +25,7 @@ main{max-width:1450px;margin:-18px auto 48px;padding:0 22px}
 .card{background:white;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 4px 15px #17334d0b;margin-bottom:14px}
 .card h2{font-size:16px;margin:0 0 14px;color:var(--navy)}
 .kpis .card{margin:0}
+.kpis .kpi{border-left:12px solid var(--line)}.kpis .kM{border-left-color:#fde4e3}.kpis .kS{border-left-color:#fff0d1}.kpis .kC{border-left-color:#dff3ee}.kpis .kW{border-left-color:#e8eef3}
 .stat{cursor:pointer}.stat.on{outline:2px solid var(--teal)}
 .kpi small{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
 .kpi strong{display:block;font-size:30px;color:var(--navy);margin-top:4px}
@@ -199,7 +200,7 @@ function render(){
  const open=st.items.filter(i=>!i.done),ret=st.items.filter(i=>i.done);
  const D={M:"Do first",S:"Do soon",C:"When time allows",W:"Parked or waiting"};
  $("stats").innerHTML=`<div class="card kpi stat ${st.pri===""&&st.view==="open"?"on":""}" data-p=""><small>Open items</small><strong>${open.length}</strong><em>All priorities</em></div>`+
-  ORDER.split("").map(k=>`<div class="card kpi stat ${st.pri===k?"on":""}" data-p="${k}"><small>${k} · ${PRI[k].n}</small><strong>${open.filter(i=>i.p===k).length}</strong><em>${D[k]}</em></div>`).join("")+
+  ORDER.split("").map(k=>`<div class="card kpi stat k${k} ${st.pri===k?"on":""}" data-p="${k}"><small>${k} · ${PRI[k].n}</small><strong>${open.filter(i=>i.p===k).length}</strong><em>${D[k]}</em></div>`).join("")+
   `<div class="card kpi stat ${st.view==="ret"?"on":""}" data-p="R"><small>Retired</small><strong>${ret.length}</strong><em>Completed or dropped</em></div>`;
  const tags=[...new Set(st.items.map(i=>i.g).filter(Boolean))].sort(),cur=$("tagF").value;
  $("tagF").innerHTML='<option value="">All tags</option>'+tags.map(t=>`<option ${t===cur?"selected":""}>${esc(t)}</option>`).join("");
