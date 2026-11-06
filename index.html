@@ -128,7 +128,7 @@ let st={items:[],view:"open",pri:"",n:1},live=false,drive=null,item=null,fname="
 const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,"0");
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function add(t,p,g,d){st.items.push({id:st.n++,t:t.trim(),p,g:(g||"").trim(),created:d===undefined?today():d,done:false,retired:""})}
+function add(t,p,g,d){st.items.unshift({id:st.n++,t:t.trim(),p,g:(g||"").trim(),created:d===undefined?today():d,done:false,retired:""})}
 const need=()=>live||(alert("Connect to your OneDrive workbook first (Connect & refresh)."),false);
 function setSource(m,ok){$("sourceText").textContent=m;$("statusDot").classList.toggle("live",ok)}
 // ---- Microsoft sign-in (same method as the Food Safety dashboard: PKCE, personal accounts, Files.ReadWrite)
